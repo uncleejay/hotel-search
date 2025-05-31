@@ -47,3 +47,6 @@ app.*.map.json
 # Environment files
 .env
 lib/env.g.dart
+
+# Generated test files
+integration_test/test_bundle.dart

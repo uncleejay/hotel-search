@@ -118,6 +118,7 @@ open docs/README.md
 
 ### QA Documentation
 - **[QA Environment Setup](docs/QA_ENVIRONMENT_SETUP.md)** - Complete testing environment setup
+- **[QA Test Strategy](docs/QA_TEST_STRATEGY.md)** - Comprehensive testing strategy and execution plan
 - **[QA Documentation Index](docs/README.md)** - QA documentation overview
 
 ### Supported Test Platforms
@@ -127,11 +128,65 @@ open docs/README.md
 
 ### Quick Test Commands
 ```bash
-# Launch Android testing
-flutter emulators --launch Medium_Phone_API_36
-flutter run -d emulator-5554
+# List available emulators/simulators
+flutter emulators
 
-# Launch iOS testing
-flutter emulators --launch apple_ios_simulator
-flutter run -d "iPhone SE (3rd generation)"
+# Launch any Android emulator (replace with your emulator name)
+flutter emulators --launch <android_emulator_name>
+
+# Launch any iOS simulator (replace with your simulator name)
+flutter emulators --launch <ios_simulator_name>
+
+# Run on any connected device
+flutter devices
+flutter run -d <device_id>
 ```
+
+### E2E Testing (Bonus) ✅
+```bash
+# List connected devices first
+flutter devices
+
+# Run automated E2E tests (replace with your device ID)
+flutter test integration_test/app_test.dart -d <device_id>
+
+# Examples:
+# flutter test integration_test/app_test.dart -d <your_android_emulator>
+# flutter test integration_test/app_test.dart -d <your_ios_simulator>
+
+# Quick test script (auto-detects devices)
+./scripts/run_e2e_tests.sh android
+./scripts/run_e2e_tests.sh ios
+```
+
+### Standard Flutter Testing ✅
+```bash
+# Run unit and widget tests
+flutter test
+
+# Run tests with coverage
+flutter test --coverage
+
+# Run specific test file
+flutter test test/widget_test.dart
+```
+
+### Multi-Device Testing ✅
+```bash
+# Automated multi-device test execution
+./scripts/run_tests_multi_device.sh all         # All tests on all devices
+./scripts/run_tests_multi_device.sh integration # Integration tests only
+
+# Manual multi-device commands
+./scripts/multi_device_commands.sh              # Show command examples
+
+# Loop through all devices
+for device in $(flutter devices | grep -E "(android|ios)" | cut -d " " -f 1); do
+  flutter test integration_test/app_test.dart -d $device
+done
+```
+
+**Test Results:**
+- ✅ **Android**: All tests passed
+- ✅ **iOS**: All tests passed
+- ✅ **Coverage**: Navigation, search, state management, cross-platform compatibility
