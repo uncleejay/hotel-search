@@ -100,3 +100,38 @@ lib
 <img src="screenshots/hotels_dark.png" alt="Search Hotels Dark" width="150"/>
 <img src="screenshots/favorites_dark.png" alt="Favorite Hotels Dark" width="150"/>
 </p>
+
+---
+
+## QA Testing Environment
+
+### Quick QA Setup
+For QA engineers and testers, comprehensive testing documentation is available:
+
+```bash
+# Verify QA environment setup
+./scripts/qa_verify.sh
+
+# Access QA documentation
+open docs/README.md
+```
+
+### QA Documentation
+- **[QA Environment Setup](docs/QA_ENVIRONMENT_SETUP.md)** - Complete testing environment setup
+- **[QA Documentation Index](docs/README.md)** - QA documentation overview
+
+### Supported Test Platforms
+- ✅ **Android Emulator** (API 36)
+- ✅ **iOS Simulator** (iOS 18.3)
+- ✅ **Cross-platform testing** verified
+
+### Quick Test Commands
+```bash
+# Launch Android testing
+flutter emulators --launch Medium_Phone_API_36
+flutter run -d emulator-5554
+
+# Launch iOS testing
+flutter emulators --launch apple_ios_simulator
+flutter run -d "iPhone SE (3rd generation)"
+```
