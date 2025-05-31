@@ -95,19 +95,26 @@ Comprehensive testing strategy for the Hotel Booking Flutter application with ri
 
 ## Test Estimation & Resource Planning
 
-### Manual Testing Effort
-- **Environment Setup**: 4 hours (one-time)
-- **P0 Test Execution**: 8 hours (cross-platform)
-- **P1 Test Execution**: 12 hours (cross-platform)
-- **Exploratory Testing**: 8 hours
-- **Regression Testing**: 6 hours per release
-- **Total Initial**: ~38 hours, ~20 hours per subsequent release
+### Manual Testing Effort (48-Hour Take Home Scope)
+- **Environment Setup**: 45 minutes (verification + device setup)
+- **P0 Critical Test Execution**: 2 hours (core functionality across Android/iOS)
+- **P1 Important Test Execution**: 1.5 hours (key features validation)
+- **Exploratory Testing**: 1 hour (edge cases & usability)
+- **Documentation & Reporting**: 4 hours (detailed test strategy, results, findings)
+- **Total Manual Testing**: ~8 hours 
 
-### Automated Testing ROI
-- **Setup Investment**: 40 hours (Patrol + test infrastructure)
-- **Maintenance**: 2 hours per feature addition
-- **Break-even**: After 3rd release cycle
-- **Long-term savings**: 70% reduction in regression testing time
+### Automated Testing Setup (Take Home Scope)
+- **Initial Setup & Configuration**: 4-6 hours (Patrol integration, test structure)
+- **Basic Test Implementation**: 6-8 hours (core E2E flows, widget tests)
+- **Test Script Development**: 2-3 hours (execution scripts, multi-device support)
+- **Documentation & Integration**: 2 hours (test documentation, CI/CD planning)
+- **Total Automation Setup**: ~14-19 hours (complete test automation foundation)
+
+### Take Home Test Realistic Scope
+- **Current App State**: Basic navigation & UI implementation
+- **Available for Testing**: Tab navigation, basic hotel search UI, favorites toggle
+- **Limited API Integration**: SerpAPI integration may be incomplete
+- **Focus Areas**: UI responsiveness, navigation flow, basic state management
 
 ## Quality Gates & Success Criteria
 
