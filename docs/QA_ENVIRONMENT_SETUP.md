@@ -1,7 +1,7 @@
 # QA Environment Setup Documentation
 
 ## Overview
-This document provides QA testing environment setup for the Hotel Booking Flutter application. This is a living document that will be expanded as we implement additional testing capabilities.
+This document provides QA testing environment setup for the Hotel Booking Flutter application. This is a living document that will be expanded as I implement additional testing capabilities.
 
 **Current Status**: Phase 1 - Basic Manual Testing Environment ✅  
 **Next Phase**: Unit Testing Framework (Planned)

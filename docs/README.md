@@ -45,8 +45,6 @@ This directory contains Quality Assurance documentation for the Hotel Booking Fl
    flutter run -d "iPhone SE (3rd generation)"
    ```
 
-## For Take-Home Assessment Reviewers
-
 ### What's Implemented ✅
 - **Environment Setup**: Complete cross-platform testing environment
 - **Device Configuration**: Android emulator + iOS simulator
