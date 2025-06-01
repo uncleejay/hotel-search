@@ -2,7 +2,7 @@
 
 ![QA Status](https://img.shields.io/badge/QA%20Status-Active-brightgreen)
 ![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)
-![Coverage](https://img.shields.io/badge/Coverage-78%25-yellow)
+![Coverage](https://img.shields.io/badge/Coverage-5.4%25-red)
 ![Last Updated](https://img.shields.io/badge/Updated-2025--06--01-blue)
 
 ## 📑 Documentation Overview
@@ -44,13 +44,13 @@ flutter test integration_test/app_test.dart -d <your_device_id>  # E2E tests
 | Testing Type | Status | Details |
 |--------------|--------|---------|
 | **Environment Setup** | ✅ Complete | Android + iOS devices configured |
-| **Unit Tests** | ✅ Passing | 87 tests, 78% coverage |
-| **Widget Tests** | ✅ Passing | 14 tests covering core components |
-| **Integration Tests** | ✅ Passing | 6 E2E test scenarios |
-| **Manual Test Cases** | ✅ Documented | 37 test cases across all features |
+| **Unit Tests** | ✅ Passing | 3 tests, 5.4% coverage (29 of 536 lines) |
+| **Widget Tests** | ✅ Passing | 3 tests (2 HotelCard tests + 1 environment test) |
+| **Integration Tests** | ✅ Passing | 1 comprehensive E2E test covering core user flows |
+| **Manual Test Cases** | ✅ Documented | 19 test cases (5 P0, 5 P1, 4 P2, 5 edge cases) |
 | **CI/CD Pipeline** | ✅ Running | GitHub Actions workflow |
 | **Cross-Platform Testing** | ✅ Verified | Android + iOS consistency confirmed |
-| **Patrol E2E Testing** | ✅ Implemented | Search flow, favorites management |
+| **Patrol E2E Testing** | 🔄 Configured | Framework installed, tests planned |
 
 ## 🔍 Key Test Flows
 
