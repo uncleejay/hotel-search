@@ -74,7 +74,21 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           target: google_apis
+          arch: x86_64
+          profile: Nexus 6
           script: |
+            # Wait for emulator to be fully booted
+            echo "Waiting for emulator to be ready..."
+            adb wait-for-device
+            
+            # Wait until the system is ready
+            echo "Waiting for system to be ready..."
+            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 3; done'
+            
+            # Show emulator info for debugging
+            adb devices
+            
+            # Run the integration test
             flutter test integration_test/app_test.dart -d emulator-5554
       
       - name: Upload test artifacts
