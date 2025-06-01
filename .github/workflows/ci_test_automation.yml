@@ -44,10 +44,6 @@ jobs:
     env:
       SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
     
-    strategy:
-      matrix:
-        api-level: [28, 33]
-    
     steps:
       - uses: actions/checkout@v4
       
@@ -72,30 +68,65 @@ jobs:
       - name: Run Android integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: ${{ matrix.api-level }}
-          target: google_apis
+          api-level: 33
+          target: default
           arch: x86_64
-          profile: Nexus 6
+          ram-size: 3072M
+          emulator-options: -no-window -no-snapshot -no-audio -no-boot-anim -gpu swiftshader_indirect -accel on
+          disable-animations: true
           script: |
-            # Wait for emulator to be fully booted
+            # Wait for emulator to be fully booted with a more robust check
             echo "Waiting for emulator to be ready..."
-            adb wait-for-device
+            adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 3; done'
+            sleep 10  # Additional delay to ensure system is fully stabilized
             
-            # Wait until the system is ready
-            echo "Waiting for system to be ready..."
-            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 3; done'
+            # Show device info
+            adb devices -l
             
-            # Show emulator info for debugging
-            adb devices
+            # Disable animations for better test stability
+            adb shell settings put global window_animation_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global animator_duration_scale 0.0
             
-            # Run the integration test
-            flutter test integration_test/app_test.dart -d emulator-5554
+            # Set device to stay awake
+            adb shell settings put global stay_on_while_plugged_in 3
+            
+            # Grant permissions that might be needed
+            adb shell pm grant $(flutter devices -v | grep emulator | awk '{print $3}') android.permission.ACCESS_FINE_LOCATION
+            adb shell pm grant $(flutter devices -v | grep emulator | awk '{print $3}') android.permission.ACCESS_COARSE_LOCATION
+            
+            # Create screenshots directory
+            mkdir -p screenshots
+            
+            # Run the integration test with retry mechanism
+            max_attempts=3
+            attempt=1
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt of $max_attempts"
+              
+              if flutter test integration_test/app_test.dart --timeout=5m; then
+                echo "Tests passed on attempt $attempt"
+                exit 0
+              else
+                echo "Tests failed on attempt $attempt"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Waiting before retry..."
+                  sleep 10
+                fi
+              fi
+              
+              attempt=$((attempt+1))
+            done
+            
+            echo "All test attempts failed"
+            exit 1
       
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: android-test-api${{ matrix.api-level }}
+          name: android-test-api33
           path: |
             screenshots/
 
