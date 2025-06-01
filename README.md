@@ -93,6 +93,18 @@ lib
 └───i18n // localizations
 ```
 
+## Documentation Structure
+
+### Architecture Documentation
+- **[Clean Architecture Overview](docs/README.md)** - Overview of the project architecture
+
+### Testing Documentation
+- **[QA Environment Setup](docs/QA_ENVIRONMENT_SETUP.md)** - Complete testing environment setup
+- **[QA Test Strategy](docs/QA_TEST_STRATEGY.md)** - Comprehensive testing strategy and execution plan
+
+### CI/CD Documentation
+- **[CI/CD Test Automation](docs/CI_CD_TEST_AUTOMATION.md)** - CI/CD workflow for parallel test execution
+
 ## Screenshots
 
 <p float="left">
@@ -117,8 +129,7 @@ open docs/README.md
 ```
 
 ### QA Documentation
-- **[QA Environment Setup](docs/QA_ENVIRONMENT_SETUP.md)** - Complete testing environment setup
-- **[QA Test Strategy](docs/QA_TEST_STRATEGY.md)** - Comprehensive testing strategy and execution plan
+- See the [Documentation Structure](#documentation-structure) section for all available documentation
 - **[QA Documentation Index](docs/README.md)** - QA documentation overview
 
 ### Supported Test Platforms

@@ -70,7 +70,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: google_apis
           script: |
-            flutter test integration_test/app_test.dart -d emulator-5554 || true
+            flutter test integration_test/app_test.dart -d emulator-5554
       
       - name: Upload test artifacts
         if: always()
@@ -79,7 +79,6 @@ jobs:
           name: android-test-api${{ matrix.api-level }}
           path: |
             screenshots/
-            logs/
 
   ios_test:
     name: iOS Integration Tests
@@ -107,7 +106,7 @@ jobs:
       
       - name: Run iOS integration tests
         run: |
-          flutter test integration_test/app_test.dart -d "$DEVICE_ID" || true
+          flutter test integration_test/app_test.dart -d "$DEVICE_ID"
       
       - name: Upload test artifacts
         if: always()
@@ -116,7 +115,6 @@ jobs:
           name: ios-test-results
           path: |
             screenshots/
-            logs/
 
   report:
     name: Test Summary
