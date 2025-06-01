@@ -110,7 +110,7 @@ For QA engineers and testers, comprehensive testing documentation is available:
 
 ```bash
 # Verify QA environment setup
-./scripts/qa_verify.sh
+flutter doctor
 
 # Access QA documentation
 open docs/README.md
@@ -142,7 +142,7 @@ flutter devices
 flutter run -d <device_id>
 ```
 
-### E2E Testing (Bonus) ✅
+### E2E Testing ✅
 ```bash
 # List connected devices first
 flutter devices
@@ -154,9 +154,9 @@ flutter test integration_test/app_test.dart -d <device_id>
 # flutter test integration_test/app_test.dart -d <your_android_emulator>
 # flutter test integration_test/app_test.dart -d <your_ios_simulator>
 
-# Quick test script (auto-detects devices)
-./scripts/run_e2e_tests.sh android
-./scripts/run_e2e_tests.sh ios
+# Quick test command (manual device selection)
+flutter devices  # List available devices
+flutter test integration_test/app_test.dart -d <device_id>
 ```
 
 ### Standard Flutter Testing ✅
@@ -173,12 +173,8 @@ flutter test test/widget_test.dart
 
 ### Multi-Device Testing ✅
 ```bash
-# Automated multi-device test execution
-./scripts/run_tests_multi_device.sh all         # All tests on all devices
-./scripts/run_tests_multi_device.sh integration # Integration tests only
-
-# Manual multi-device commands
-./scripts/multi_device_commands.sh              # Show command examples
+# Manual multi-device testing
+flutter devices  # List available devices
 
 # Loop through all devices
 for device in $(flutter devices | grep -E "(android|ios)" | cut -d " " -f 1); do

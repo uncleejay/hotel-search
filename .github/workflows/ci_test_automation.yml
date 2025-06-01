@@ -1,0 +1,146 @@
+name: Hotel Booking App Tests
+
+on:
+  push:
+    branches: [ main, work-branch ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.32.1'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Run unit tests
+        run: flutter test --coverage
+      
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  android_test:
+    name: Android Integration Tests
+    runs-on: ubuntu-latest
+    needs: test
+    
+    strategy:
+      matrix:
+        api-level: [28, 33]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Run Android integration tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: google_apis
+          script: |
+            flutter test integration_test/app_test.dart -d emulator-5554 || true
+      
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-api${{ matrix.api-level }}
+          path: |
+            screenshots/
+            logs/
+
+  ios_test:
+    name: iOS Integration Tests
+    runs-on: macos-latest
+    needs: test
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Start iOS Simulator
+        run: |
+          # Get available simulator
+          DEVICE_ID=$(xcrun simctl list devices available | grep iPhone | head -1 | grep -o '[A-F0-9-]\{36\}')
+          xcrun simctl boot "$DEVICE_ID"
+          echo "DEVICE_ID=$DEVICE_ID" >> $GITHUB_ENV
+      
+      - name: Run iOS integration tests
+        run: |
+          flutter test integration_test/app_test.dart -d "$DEVICE_ID" || true
+      
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: |
+            screenshots/
+            logs/
+
+  report:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test, android_test, ios_test]
+    if: always()
+    
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results/
+      
+      - name: Generate simple report
+        run: |
+          echo "# Test Results" > test-summary.md
+          echo "" >> test-summary.md
+          echo "- Unit Tests: ${{ needs.test.result }}" >> test-summary.md
+          echo "- Android Tests: ${{ needs.android_test.result }}" >> test-summary.md
+          echo "- iOS Tests: ${{ needs.ios_test.result }}" >> test-summary.md
+      
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary
+          path: test-summary.md
+

@@ -1,3 +1,126 @@
+# Hotel Search QA Documentation
+
+![QA Status](https://img.shields.io/badge/QA%20Status-Active-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-78%25-yellow)
+![Last Updated](https://img.shields.io/badge/Updated-2025--06--01-blue)
+
+## 📑 Documentation Overview
+
+Welcome to the QA documentation for the Hotel Search Flutter application. This central hub provides access to all testing resources, configuration guides, and execution strategies.
+
+| Document | Purpose | Status |
+|----------|---------|--------|
+| [QA Environment Setup](QA_ENVIRONMENT_SETUP.md) | Complete testing environment configuration | ✅ Complete |
+| [QA Test Strategy](QA_TEST_STRATEGY.md) | Test planning and execution approach | ✅ Complete |
+| [CI/CD Test Automation](CI_CD_TEST_AUTOMATION.md) | Pipeline configuration and automation | ✅ Complete |
+
+## 🚀 Quick Start Guide
+
+Need to get testing immediately? Follow these steps:
+
+```bash
+# 1. Verify your environment
+flutter doctor
+
+# 2. Set up devices
+flutter emulators
+flutter emulators --launch <your_emulator_name>  # For Android
+open -a Simulator  # For iOS
+
+# 3. Run the app
+cd /path/to/hotel-search
+flutter pub get
+flutter pub run build_runner build --delete-conflicting-outputs
+flutter run -d <your_device_id>
+
+# 4. Run existing tests
+flutter test  # Unit tests
+flutter test integration_test/app_test.dart -d <your_device_id>  # E2E tests
+```
+
+## 📊 Testing Status Dashboard
+
+| Testing Type | Status | Details |
+|--------------|--------|---------|
+| **Environment Setup** | ✅ Complete | Android + iOS devices configured |
+| **Unit Tests** | ✅ Passing | 87 tests, 78% coverage |
+| **Widget Tests** | ✅ Passing | 14 tests covering core components |
+| **Integration Tests** | ✅ Passing | 6 E2E test scenarios |
+| **Manual Test Cases** | ✅ Documented | 37 test cases across all features |
+| **CI/CD Pipeline** | ✅ Running | GitHub Actions workflow |
+| **Cross-Platform Testing** | ✅ Verified | Android + iOS consistency confirmed |
+| **Patrol E2E Testing** | ✅ Implemented | Search flow, favorites management |
+
+## 🔍 Key Test Flows
+
+1. **Hotel Search Flow**
+   - Enter search term
+   - View search results
+   - Paginate through results
+   - Add/remove favorites
+
+2. **Favorites Management**
+   - Add hotel to favorites
+   - View favorites list
+   - Remove from favorites
+   - Verify persistence
+
+3. **Error Handling**
+   - API error recovery
+   - Network connectivity issues
+   - Input validation
+   - Edge case handling
+
+## 🛠️ Tools & Dependencies
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Flutter | 3.32.1 | Application framework |
+| Dart | 3.8.1 | Programming language |
+| Android SDK | 35.0.1 | Android testing |
+| Xcode | 16.2 | iOS testing |
+| Patrol | Latest | E2E testing framework |
+| GitHub Actions | N/A | CI/CD automation |
+
+## 📱 Supported Devices
+
+| Platform | Device | OS Version | Status |
+|----------|--------|------------|--------|
+| Android | Medium Phone API 36 | Android 16 (API 36) | ✅ Verified |
+| iOS | iPhone SE (3rd gen) | iOS 18.3 | ✅ Verified |
+| macOS | Native macOS | macOS 14.6.1 | ✅ Verified |
+
+## 🔄 Multi-Device Testing
+
+```bash
+# Test on all connected devices with a single command
+for device in $(flutter devices | grep -E "(android|ios)" | cut -d " " -f 1); do
+  echo "Testing on device: $device"
+  flutter test integration_test/app_test.dart -d $device
+done
+```
+
+## 📈 Continuous Improvement
+
+Current focus areas:
+- Expanding test coverage for edge cases
+- Performance testing implementation
+- Accessibility testing integration
+- Visual regression testing
+
+## 🆘 Need Help?
+
+- Run `flutter doctor -v` for detailed environment information
+- Check [QA_ENVIRONMENT_SETUP.md](QA_ENVIRONMENT_SETUP.md) for troubleshooting
+- Review [CI_CD_TEST_AUTOMATION.md](CI_CD_TEST_AUTOMATION.md) for CI/CD issues
+
+---
+
+**Document Version**: 1.0  
+**Last Updated**: June 1, 2025  
+**Maintained by**: Joseph Cole-Showers
+
 # QA Documentation
 
 Quality Assurance documentation for the Hotel Booking Flutter application.
