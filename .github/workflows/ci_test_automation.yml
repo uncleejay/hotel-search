@@ -41,6 +41,8 @@ jobs:
     name: Android Integration Tests
     runs-on: ubuntu-latest
     needs: test
+    env:
+      SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
     
     strategy:
       matrix:
@@ -64,6 +66,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       
+      - name: Generate Environment Configuration
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      
       - name: Run Android integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -84,6 +89,8 @@ jobs:
     name: iOS Integration Tests
     runs-on: macos-latest
     needs: test
+    env:
+      SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
     
     steps:
       - uses: actions/checkout@v4
@@ -96,6 +103,9 @@ jobs:
       
       - name: Install dependencies
         run: flutter pub get
+      
+      - name: Generate Environment Configuration
+        run: flutter pub run build_runner build --delete-conflicting-outputs
       
       - name: Start iOS Simulator
         run: |
