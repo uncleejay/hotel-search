@@ -6,11 +6,11 @@ import 'package:hotel_booking/features/hotels/domain/entities/entities.dart';
 void main() {
   group('Hotel Card Widget Tests', () {
     testWidgets('HotelCard displays hotel information correctly', (WidgetTester tester) async {
-      // Create test data
+      // Create test data with London-specific information
       final testHotel = Hotel(
-        name: 'Test Hotel',
-        location: Location(latitude: 40.7128, longitude: -74.0060),
-        description: 'A beautiful test hotel',
+        name: 'London Hotel',
+        location: Location(latitude: 51.5074, longitude: -0.1278),
+        description: 'Modern hotel in central London',
       );
 
       bool favoriteChanged = false;
@@ -31,8 +31,8 @@ void main() {
       );
 
       // Verify hotel information is displayed
-      expect(find.text('Test Hotel'), findsOneWidget);
-      expect(find.text('A beautiful test hotel'), findsOneWidget);
+      expect(find.text('London Hotel'), findsOneWidget);
+      expect(find.text('Modern hotel in central London'), findsOneWidget);
       expect(find.byIcon(Icons.favorite_outline), findsOneWidget);
 
       // Test favorite button interaction
@@ -42,9 +42,9 @@ void main() {
 
     testWidgets('HotelCard shows filled heart when favorited', (WidgetTester tester) async {
       final testHotel = Hotel(
-        name: 'Favorite Hotel',
-        location: Location(latitude: 40.7128, longitude: -74.0060),
-        description: 'A favorited hotel',
+        name: 'The Savoy London',
+        location: Location(latitude: 51.5074, longitude: -0.1278),
+        description: 'Luxury hotel on the River Thames',
       );
 
       await tester.pumpWidget(
