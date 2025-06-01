@@ -93,6 +93,14 @@ lib
 └───i18n // localizations
 ```
 
+## Screenshots
+
+<p float="left">
+<img src="screenshots/hotels_light.png" alt="Search Hotels Light" width="150"/>
+<img src="screenshots/hotels_dark.png" alt="Search Hotels Dark" width="150"/>
+<img src="screenshots/favorites_dark.png" alt="Favorite Hotels Dark" width="150"/>
+</p>
+
 ---
 
 ## QA Testing Environment
@@ -119,14 +127,6 @@ flutter doctor
 # Access QA documentation
 open docs/README.md
 ```
-
-## Screenshots
-
-<p float="left">
-<img src="screenshots/hotels_light.png" alt="Search Hotels Light" width="150"/>
-<img src="screenshots/hotels_dark.png" alt="Search Hotels Dark" width="150"/>
-<img src="screenshots/favorites_dark.png" alt="Favorite Hotels Dark" width="150"/>
-</p>
 
 ### Supported Test Platforms
 - ✅ **Android Emulator** (API 36)
