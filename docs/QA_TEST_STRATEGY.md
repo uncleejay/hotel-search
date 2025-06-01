@@ -146,19 +146,84 @@ Comprehensive testing strategy for the Hotel Booking Flutter application with ri
 
 ## Quick Commands
 
+### Environment Setup
+
 ```bash
 # Verify environment
 flutter doctor
 
-# Launch Android testing
-flutter run -d emulator-5554
+# Install Patrol CLI (if not already installed)
+dart pub global activate patrol_cli
 
-# Launch iOS testing
-flutter run -d "iPhone SE (3rd generation)"
+# Add Patrol to PATH (add to your .zshrc or .bashrc for persistence)
+export PATH="$PATH":"$HOME/.pub-cache/bin"
+```
 
-# Run tests (when implemented)
+### Device Setup
+
+```bash
+# List available iOS simulators
+xcrun simctl list devices
+
+# Boot an iOS simulator
+xcrun simctl boot "iPhone 16 Pro"  # or other available device name
+
+# List available Android emulators
+flutter emulators
+
+# Launch an Android emulator
+flutter emulators --launch <emulator_id>
+```
+
+### Running the App
+
+```bash
+# Launch on Android emulator
+flutter run -d emulator-5554  # replace with your emulator ID
+
+# Launch on iOS simulator
+flutter run -d "iPhone SE (3rd generation)"  # or other available device
+
+# Run in release mode
+flutter run --release -d <device_id>
+```
+
+### Test Execution
+
+```bash
+# Run all unit and widget tests
 flutter test
-patrol test integration_test/
+
+# Run a specific test file
+flutter test test/widget_test.dart
+
+# Run integration tests on iOS simulator
+flutter test integration_test/app_test.dart -d "iPhone 16 Pro"
+
+# Run integration tests on Android emulator
+flutter test integration_test/app_test.dart -d emulator-5554
+
+# Run with verbose output for debugging
+flutter test --verbose integration_test/app_test.dart
+
+# Run all tests with coverage
+flutter test --coverage
+
+# Generate coverage report (requires lcov)
+genhtml coverage/lcov.info -o coverage/html
+
+# Open coverage report
+open coverage/html/index.html
+```
+
+### CI/CD Commands
+
+```bash
+# Run all tests (unit, widget, integration) for CI pipeline
+flutter test && flutter test integration_test
+
+# Run tests with specific timeout
+flutter test --timeout=60s
 ```
 
 ## Success Criteria
