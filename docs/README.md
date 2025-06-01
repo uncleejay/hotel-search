@@ -130,7 +130,6 @@ Quality Assurance documentation for the Hotel Booking Flutter application.
 Testing approach includes:
 - Risk-based testing with effort allocation by impact
 - Quality gates with measurable success criteria  
-- ROI-focused automation strategy
 - Cross-platform testing methodology
 - Continuous improvement metrics and optimization
 
@@ -144,7 +143,6 @@ Testing approach includes:
 
 **Testing Approach**: Risk-based with 60% effort on high-risk areas  
 **Quality Gates**: 100% P0 pass rate, <2s performance targets  
-**Automation ROI**: Break-even after 3rd release cycle  
 **Cross-Platform**: iOS + Android parity validation
 
 ## Quick Start for QA Engineers

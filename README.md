@@ -93,29 +93,21 @@ lib
 └───i18n // localizations
 ```
 
-## Documentation Structure
-
-### Architecture Documentation
-- **[Clean Architecture Overview](docs/README.md)** - Overview of the project architecture
-
-### Testing Documentation
-- **[QA Environment Setup](docs/QA_ENVIRONMENT_SETUP.md)** - Complete testing environment setup
-- **[QA Test Strategy](docs/QA_TEST_STRATEGY.md)** - Comprehensive testing strategy and execution plan
-
-### CI/CD Documentation
-- **[CI/CD Test Automation](docs/CI_CD_TEST_AUTOMATION.md)** - CI/CD workflow for parallel test execution
-
-## Screenshots
-
-<p float="left">
-<img src="screenshots/hotels_light.png" alt="Search Hotels Light" width="150"/>
-<img src="screenshots/hotels_dark.png" alt="Search Hotels Dark" width="150"/>
-<img src="screenshots/favorites_dark.png" alt="Favorite Hotels Dark" width="150"/>
-</p>
-
 ---
 
 ## QA Testing Environment
+
+### QA Documentation
+
+#### Architecture Documentation
+- **[Clean Architecture Overview](docs/README.md)** - Overview of the project architecture
+
+#### Testing Documentation
+- **[QA Environment Setup](docs/QA_ENVIRONMENT_SETUP.md)** - Complete testing environment setup
+- **[QA Test Strategy](docs/QA_TEST_STRATEGY.md)** - Comprehensive testing strategy and execution plan
+
+#### CI/CD Documentation
+- **[CI/CD Test Automation](docs/CI_CD_TEST_AUTOMATION.md)** - CI/CD workflow for parallel test execution
 
 ### Quick QA Setup
 For QA engineers and testers, comprehensive testing documentation is available:
@@ -128,9 +120,13 @@ flutter doctor
 open docs/README.md
 ```
 
-### QA Documentation
-- See the [Documentation Structure](#documentation-structure) section for all available documentation
-- **[QA Documentation Index](docs/README.md)** - QA documentation overview
+## Screenshots
+
+<p float="left">
+<img src="screenshots/hotels_light.png" alt="Search Hotels Light" width="150"/>
+<img src="screenshots/hotels_dark.png" alt="Search Hotels Dark" width="150"/>
+<img src="screenshots/favorites_dark.png" alt="Favorite Hotels Dark" width="150"/>
+</p>
 
 ### Supported Test Platforms
 - ✅ **Android Emulator** (API 36)
