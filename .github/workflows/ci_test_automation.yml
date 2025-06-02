@@ -1,5 +1,25 @@
 name: Hotel Booking App Tests
 
+  test_summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit_tests, android_test, ios_test]
+    if: always()
+    
+    steps:
+      - name: Generate test summary
+        run: |
+          echo "# Test Results Summary" > summary.md
+          echo "" >> summary.md
+          echo "- Unit Tests: ${{ needs.unit_tests.result }}" >> summary.md
+          echo "- Android Tests: ${{ needs.android_test.result }}" >> summary.md
+          echo "- iOS Tests: ${{ needs.ios_test.result }}" >> summary.md
+      
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary
+          path: summary.md
 on:
   push:
     branches: [ main, work-branch ]
@@ -11,8 +31,8 @@ env:
   FLUTTER_VERSION: '3.32.1'
 
 jobs:
-  test:
-    name: Run Tests
+  unit_tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     
     steps:
@@ -28,19 +48,12 @@ jobs:
         run: flutter pub get
       
       - name: Run unit tests
-        run: flutter test --coverage
-      
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
+        run: flutter test
 
   android_test:
     name: Android Integration Tests
     runs-on: ubuntu-latest
-    needs: test
+    needs: unit_tests
     env:
       SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
     
@@ -71,7 +84,7 @@ jobs:
           api-level: 33
           target: default
           arch: x86_64
-          emulator-options: -no-window -no-snapshot-save -no-snapshot-load
+          emulator-options: -no-window
           script: |
             # Wait for emulator to be ready
             adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 3; done'
@@ -79,32 +92,31 @@ jobs:
             # Create screenshots directory
             mkdir -p screenshots
             
-            # Run the integration test with proper error handling
-            flutter test integration_test/app_test.dart || {
-              # Capture screenshot on failure
-              echo "Test failed, capturing screenshots for diagnostics..."
+            # Run the integration test with error handling
+            set +e
+            flutter test integration_test/app_test.dart
+            test_exit_code=$?
+            
+            # Capture screenshot if test fails
+            if [ $test_exit_code -ne 0 ]; then
+              echo "Test failed, capturing screenshot..."
               adb shell screencap -p /sdcard/failure_screen.png
               adb pull /sdcard/failure_screen.png screenshots/android_failure.png
-              
-              # Capture app logs
-              adb logcat -d > screenshots/android_logcat.txt
-              
-              exit 1
-            }
-      
-      - name: Upload test artifacts
+            fi
+            
+            exit $test_exit_code
+            
+      - name: Upload Android test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: android-test-logs
-          path: |
-            build/reports/
-            screenshots/
+          name: android-test-results
+          path: screenshots/
 
   ios_test:
     name: iOS Integration Tests
     runs-on: macos-latest
-    needs: test
+    needs: unit_tests
     env:
       SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
     
@@ -135,149 +147,22 @@ jobs:
           # Create screenshots directory
           mkdir -p screenshots
           
-          # Run the test with exit code capture
+          # Run the test with error handling
           set +e
           flutter test integration_test/app_test.dart -d "$DEVICE_ID"
           test_exit_code=$?
           
           # Capture screenshot if test fails
           if [ $test_exit_code -ne 0 ]; then
-            echo "Test failed, capturing screenshots for diagnostics..."
+            echo "Test failed, capturing screenshot..."
             xcrun simctl io "$DEVICE_ID" screenshot screenshots/ios_failure.png
-            
-            # Capture simulator logs
-            xcrun simctl spawn "$DEVICE_ID" log show --predicate 'processImagePath contains "Runner"' --style compact > screenshots/ios_simulator.log
           fi
           
           exit $test_exit_code
-      
-      - name: Upload test artifacts
+          
+      - name: Upload iOS test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ios-test-results
-          path: |
-            screenshots/
-
-  report:
-    name: Test Summary
-    runs-on: ubuntu-latest
-    needs: [test, android_test, ios_test]
-    if: always()
-    
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: test-results/
-      
-      - name: Generate HTML report
-        run: |
-          # Create HTML report
-          cat > test-report.html << 'EOL'
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Hotel Search App Test Report</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.6; }
-              h1, h2, h3 { color: #333; }
-              .container { max-width: 1200px; margin: 0 auto; }
-              .summary { display: flex; margin-bottom: 20px; }
-              .summary-box { flex: 1; margin: 10px; padding: 15px; border-radius: 5px; }
-              .success { background-color: #dff0d8; border: 1px solid #d6e9c6; }
-              .failure { background-color: #f2dede; border: 1px solid #ebccd1; }
-              .pending { background-color: #fcf8e3; border: 1px solid #faebcc; }
-              .details { margin-top: 30px; }
-              .screenshot { max-width: 500px; border: 1px solid #ddd; margin: 10px 0; }
-              table { border-collapse: collapse; width: 100%; }
-              th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
-              th { background-color: #f2f2f2; }
-              tr:hover { background-color: #f5f5f5; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <h1>Hotel Search App Test Report</h1>
-              <p>Generated at: $(date)</p>
-              
-              <div class="summary">
-                <div class="summary-box $([[ "${{ needs.test.result }}" == "success" ]] && echo "success" || echo "failure")">
-                  <h3>Unit Tests</h3>
-                  <p>Status: ${{ needs.test.result }}</p>
-                </div>
-                <div class="summary-box $([[ "${{ needs.android_test.result }}" == "success" ]] && echo "success" || echo "failure")">
-                  <h3>Android Tests</h3>
-                  <p>Status: ${{ needs.android_test.result }}</p>
-                </div>
-                <div class="summary-box $([[ "${{ needs.ios_test.result }}" == "success" ]] && echo "success" || echo "failure")">
-                  <h3>iOS Tests</h3>
-                  <p>Status: ${{ needs.ios_test.result }}</p>
-                </div>
-              </div>
-              
-              <div class="details">
-                <h2>Test Details</h2>
-                
-                <h3>Unit Test Coverage</h3>
-                <p>Coverage data available in artifacts.</p>
-                
-                <h3>Android Test Results</h3>
-                <!-- Include Android screenshots if available -->
-                $(if [ -f "test-results/android-test-logs/screenshots/android_failure.png" ]; then
-                  echo "<img src='android_failure.png' class='screenshot' alt='Android Failure Screenshot'>"
-                  echo "<p>Android test failed. See screenshot above.</p>"
-                else
-                  echo "<p>No Android test failures detected.</p>"
-                fi)
-                
-                <h3>iOS Test Results</h3>
-                <!-- Include iOS screenshots if available -->
-                $(if [ -f "test-results/ios-test-results/screenshots/ios_failure.png" ]; then
-                  echo "<img src='ios_failure.png' class='screenshot' alt='iOS Failure Screenshot'>"
-                  echo "<p>iOS test failed. See screenshot above.</p>"
-                else
-                  echo "<p>No iOS test failures detected.</p>"
-                fi)
-              </div>
-            </div>
-          </body>
-          </html>
-          EOL
-          
-          # Copy any screenshots to the same directory as the HTML file
-          if [ -f "test-results/android-test-logs/screenshots/android_failure.png" ]; then
-            cp test-results/android-test-logs/screenshots/android_failure.png android_failure.png
-          fi
-          
-          if [ -f "test-results/ios-test-results/screenshots/ios_failure.png" ]; then
-            cp test-results/ios-test-results/screenshots/ios_failure.png ios_failure.png
-          fi
-      
-      - name: Upload HTML report
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-report
-          path: |
-            test-report.html
-            android_failure.png
-            ios_failure.png
-            
-      - name: Generate simple report (for backwards compatibility)
-        run: |
-          echo "# Test Results" > test-summary.md
-          echo "" >> test-summary.md
-          echo "- Unit Tests: ${{ needs.test.result }}" >> test-summary.md
-          echo "- Android Tests: ${{ needs.android_test.result }}" >> test-summary.md
-          echo "- iOS Tests: ${{ needs.ios_test.result }}" >> test-summary.md
-          echo "" >> test-summary.md
-          echo "Detailed HTML report available in the test-report artifact." >> test-summary.md
-      
-      - name: Upload simple report
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-summary
-          path: test-summary.md
-
+          path: screenshots/
