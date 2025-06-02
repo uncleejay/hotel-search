@@ -5,17 +5,42 @@ import 'package:hotel_booking/main.dart';
 import 'package:hotel_booking/core/di/injectable.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dart:io' show Directory, File, Platform;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  
+  // Track directory for cleanup
+  Directory? hiveDirectory;
 
   group('Hotel Booking App E2E Tests', () {
+    // Add tearDown for proper cleanup
+    tearDown(() async {
+      print('Cleaning up after test...');
+      
+      // Clean up Hive directory if possible
+      if (hiveDirectory != null && hiveDirectory!.existsSync()) {
+        try {
+          // Only attempt to delete files, not the whole directory
+          final files = hiveDirectory!.listSync();
+          for (final file in files) {
+            if (file is File && file.path.contains('.hive')) {
+              file.deleteSync();
+              print('Deleted Hive file: ${file.path}');
+            }
+          }
+        } catch (e) {
+          print('Warning when cleaning Hive files: $e');
+        }
+      }
+    });
     testWidgets('Hotel search and navigation flow', (WidgetTester tester) async {
       try {
         print('Starting integration test');
         
         // Setup Hive directory for testing
         final directory = await getApplicationDocumentsDirectory();
+        hiveDirectory = directory; // Store for cleanup
         Hive.defaultDirectory = directory.path;
         
         // Setup dependency injection for testing
@@ -73,8 +98,20 @@ void main() {
         print('Navigated to Overview tab');
         
         print('E2E Test completed successfully');
-      } catch (e) {
+      } catch (e, stackTrace) {
         print('Test failed with error: $e');
+        print('Stack trace: $stackTrace');
+        
+        // Try to capture diagnostic information on failure
+        try {
+          print('Diagnostic information:');
+          print('Platform: ${Platform.operatingSystem}');
+          final widgetsOnScreen = tester.widgetList(find.byType(Widget)).length;
+          print('Widgets on screen: $widgetsOnScreen');
+        } catch (diagnosticError) {
+          print('Failed to capture diagnostics: $diagnosticError');
+        }
+        
         rethrow;
       }
     });
