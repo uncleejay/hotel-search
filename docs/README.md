@@ -90,16 +90,6 @@ flutter test integration_test/app_test.dart -d <your_device_id>  # E2E tests
 | Android | Medium Phone API 36 | Android 16 (API 36) | ✅ Verified |
 | iOS | iPhone SE (3rd gen) | iOS 18.3 | ✅ Verified |
 
-## 🔄 Multi-Device Testing
-
-```bash
-# Test on all connected devices with a single command
-for device in $(flutter devices | grep -E "(android|ios)" | cut -d " " -f 1); do
-  echo "Testing on device: $device"
-  flutter test integration_test/app_test.dart -d $device
-done
-```
-
 ## 📈 Continuous Improvement
 
 Current focus areas:
@@ -176,6 +166,29 @@ Testing approach includes:
    # Launch on iOS
    flutter run -d "iPhone SE (3rd generation)"
    ```
+
+## Multi-Device Testing
+
+Execute tests across all connected devices with a single command:
+
+```bash
+# Script to run tests on all connected Android and iOS devices
+for device in $(flutter devices | grep -E "(android|ios)" | cut -d "•" -f 1); do
+    echo "Running tests on device: $device"
+    flutter test integration_test/app_test.dart -d $device
+done
+```
+
+This script will:
+1. Find all connected Android and iOS devices
+2. Automatically run tests on each device
+3. Report results for each device
+
+You can also run tests on specific devices manually:
+```bash
+flutter test integration_test/app_test.dart -d emulator-5554  # Android
+flutter test integration_test/app_test.dart -d "iPhone SE (3rd generation)"  # iOS
+```
 
 ### What's Implemented ✅
 - **Complete Testing Environment**: Cross-platform setup with Android and iOS devices
