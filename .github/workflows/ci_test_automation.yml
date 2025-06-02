@@ -79,22 +79,18 @@ jobs:
             # Create screenshots directory
             mkdir -p screenshots
             
-            # Run the integration test
-            set +e
-            flutter test integration_test/app_test.dart
-            test_exit_code=$?
-            
-            # Capture screenshot if test fails
-            if [ $test_exit_code -ne 0 ]; then
+            # Run the integration test with proper error handling
+            flutter test integration_test/app_test.dart || {
+              # Capture screenshot on failure
               echo "Test failed, capturing screenshots for diagnostics..."
               adb shell screencap -p /sdcard/failure_screen.png
               adb pull /sdcard/failure_screen.png screenshots/android_failure.png
               
               # Capture app logs
               adb logcat -d > screenshots/android_logcat.txt
-            fi
-            
-            exit $test_exit_code
+              
+              exit 1
+            }
       
       - name: Upload test artifacts
         if: always()
