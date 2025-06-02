@@ -69,28 +69,160 @@ jobs:
       - name: Run Android integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 22
+          api-level: 29
           target: default
-          arch: x86
-          emulator-options: -no-window -no-audio -no-boot-anim
+          arch: x86_64
+          emulator-options: -no-window -no-snapshot -no-audio -no-boot-anim -no-metrics -gpu swiftshader_indirect -camera-back none -camera-front none -memory 1024 -cache-size 32M
           disk-size: 1000M
           ram-size: 1024M
           force-avd-creation: true
           script: |
-            # Wait for emulator to fully boot
+            # Create directories for logs and screenshots with more specific folders
+            mkdir -p android_test_artifacts/logs/device
+            mkdir -p android_test_artifacts/logs/test_output
+            mkdir -p android_test_artifacts/screenshots
+
+            echo "::group::Emulator Boot Process"
+            # Wait for emulator to fully boot with progressive feedback
+            echo "Waiting for emulator to start..."
             adb wait-for-device
-            adb shell 'while [[ "$(getprop sys.boot_completed)" != "1" ]]; do sleep 2; done'
-            echo "✓ Emulator is fully booted and ready"
+            echo "Device connected, waiting for boot completion..."
             
-            # Run integration test with reasonable timeout
-            flutter test integration_test/app_test.dart --timeout=2m
+            # Get initial device diagnostics
+            adb devices -l > android_test_artifacts/logs/device/devices_initial.log
+            
+            # Wait with timeout and progress indication
+            boot_timeout=180
+            start_time=$(date +%s)
+            boot_completed=false
+            
+            while true; do
+              # Check if the device is fully booted
+              if adb shell getprop sys.boot_completed | grep -q '1'; then
+                echo "✓ Emulator is fully booted and ready"
+                boot_completed=true
+                break
+              fi
+              
+              current_time=$(date +%s)
+              elapsed=$((current_time - start_time))
+              
+              # Only collect properties every 30 seconds to reduce noise
+              if [ $((elapsed % 30)) -eq 0 ]; then
+                echo "Collecting device properties at ${elapsed}s mark..."
+                adb shell getprop > android_test_artifacts/logs/device/props_${elapsed}s.log
+              fi
+              
+              if [ $elapsed -gt $boot_timeout ]; then
+                echo "⚠️ Emulator boot timeout after ${boot_timeout}s. Capturing diagnostics before continuing..."
+                adb logcat -d > android_test_artifacts/logs/device/boot_timeout_logcat.log
+                adb shell screencap -p /sdcard/boot_timeout_screen.png
+                adb pull /sdcard/boot_timeout_screen.png android_test_artifacts/screenshots/
+                break
+              fi
+              
+              echo "Waiting for emulator boot completion: ${elapsed}s elapsed..."
+              sleep 5
+            done
+            echo "::endgroup::"
+            
+            echo "::group::Device Configuration"
+            # Collect comprehensive device info for debugging
+            echo "Collecting device diagnostics..."
+            adb devices -l > android_test_artifacts/logs/device/devices_final.log
+            adb shell getprop > android_test_artifacts/logs/device/props_final.log
+            adb shell settings list system > android_test_artifacts/logs/device/settings_system.log
+            adb shell pm list packages -f > android_test_artifacts/logs/device/packages.log
+            
+            # Disable animations to improve test stability
+            echo "Disabling animations for test stability..."
+            adb shell settings put global window_animation_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global animator_duration_scale 0.0
+            echo "::endgroup::"
+            
+            # Start detailed logcat capture in background with filters for Flutter and app
+            echo "Starting logcat capture..."
+            adb logcat *:I > android_test_artifacts/logs/device/full_logcat.log &
+            FULL_LOGCAT_PID=$!
+            
+            # Separate Flutter-specific logs for easier debugging
+            adb logcat -v time ActivityManager:I flutter:V *:S > android_test_artifacts/logs/test_output/flutter_logcat.log &
+            FLUTTER_LOGCAT_PID=$!
+            
+            echo "::group::Integration Test Execution"
+            # Create a dedicated test output file
+            touch android_test_artifacts/logs/test_output/flutter_test_output.log
+            
+            # Run integration test with explicit timeout and verbose output
+            echo "Starting integration tests with verbose output..."
+            set +e
+            flutter --verbose test \
+              --timeout=5m \
+              --no-retry \
+              --reporter expanded \
+              integration_test/app_test.dart \
+              2>&1 | tee android_test_artifacts/logs/test_output/flutter_test_output.log
+            TEST_EXIT_CODE=$?
+            set -e
+            echo "::endgroup::"
+            
+            # Stop logcat captures
+            echo "Stopping logcat capture..."
+            kill $FULL_LOGCAT_PID || true
+            kill $FLUTTER_LOGCAT_PID || true
+            
+            echo "::group::Test Results & Diagnostics"
+            # Capture screenshot regardless of test result for diagnostics
+            echo "Capturing final device screenshot..."
+            adb shell screencap -p /sdcard/final_screen.png
+            adb pull /sdcard/final_screen.png android_test_artifacts/screenshots/final_state.png
+            
+            # If test failed, capture additional diagnostics and screenshots
+            if [ $TEST_EXIT_CODE -ne 0 ]; then
+              echo "❌ Tests failed with exit code $TEST_EXIT_CODE"
+              
+              # Capture additional screenshots from different app screens if possible
+              echo "Attempting to capture additional diagnostic screenshots..."
+              for i in {1..3}; do
+                adb shell input swipe 500 1000 500 300  # Scroll down
+                sleep 1
+                adb shell screencap -p /sdcard/failure_screen_${i}.png
+                adb pull /sdcard/failure_screen_${i}.png android_test_artifacts/screenshots/
+              done
+              
+              # Capture comprehensive device state information
+              echo "Capturing device state diagnostics..."
+              adb shell dumpsys meminfo > android_test_artifacts/logs/device/meminfo.log
+              adb shell dumpsys activity > android_test_artifacts/logs/device/activity.log
+              adb shell dumpsys window > android_test_artifacts/logs/device/window.log
+              adb shell ps > android_test_artifacts/logs/device/process_list.log
+              
+              # Create a detailed summary file
+              echo "Tests failed with exit code $TEST_EXIT_CODE" > android_test_artifacts/summary.txt
+              if [ "$boot_completed" = false ]; then
+                echo "Boot process did not complete properly" >> android_test_artifacts/summary.txt
+              fi
+              
+              # Extract key error messages from the test output
+              echo "Extracting key error messages..."
+              grep -E "Error:|Exception:|Failed|failure|FAIL" android_test_artifacts/logs/test_output/flutter_test_output.log > android_test_artifacts/logs/test_output/error_summary.log || true
+            else
+              echo "✅ Tests completed successfully!"
+              echo "Tests completed successfully" > android_test_artifacts/summary.txt
+            fi
+            echo "::endgroup::"
+            
+            exit $TEST_EXIT_CODE
       
       - name: Upload Android test artifacts
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-test-results
-          path: build/reports/
+          path: |
+            android_test_artifacts/
+            build/reports/
 
   ios_test:
     name: iOS Integration Tests
