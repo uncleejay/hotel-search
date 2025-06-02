@@ -240,7 +240,6 @@ done
 |----------|--------|----------------|---------|-------|
 | Android | Medium Phone API 36 | Android 16 (API 36) | ✅ Verified | Primary Android test device |
 | iOS | iPhone SE (3rd gen) | iOS 18.3 | ✅ Verified | Primary iOS test device |
-| macOS | Native macOS | macOS 14.6.1 | ✅ Verified | Development platform |
 
 ---
 
