@@ -89,7 +89,6 @@ flutter test integration_test/app_test.dart -d <your_device_id>  # E2E tests
 |----------|--------|------------|--------|
 | Android | Medium Phone API 36 | Android 16 (API 36) | ✅ Verified |
 | iOS | iPhone SE (3rd gen) | iOS 18.3 | ✅ Verified |
-| macOS | Native macOS | macOS 14.6.1 | ✅ Verified |
 
 ## 🔄 Multi-Device Testing
 
