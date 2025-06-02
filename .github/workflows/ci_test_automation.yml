@@ -70,23 +70,72 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
-          target: default
+          target: google_apis
           arch: x86_64
-          emulator-options: -no-window -no-snapshot -no-audio -no-boot-anim -no-metrics -gpu swiftshader_indirect -camera-back none -camera-front none -memory 1024 -cache-size 32M
-          disk-size: 1000M
-          ram-size: 1024M
+          emulator-options: -no-window -no-snapshot -no-audio -gpu swiftshader_indirect -no-boot-anim -memory 4096 -accel on -no-snapshot-save -avd test -port 5554
+          disk-size: 4096M
+          ram-size: 4096M
+          profile: pixel_6
           force-avd-creation: true
+          working-directory: .
+          cores: 2
           script: |
+            # Set environment variables for emulator
+            export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+            export ANDROID_AVD_HOME=$HOME/.android/avd
+            
             # Create directories for logs and screenshots with more specific folders
             mkdir -p android_test_artifacts/logs/device
             mkdir -p android_test_artifacts/logs/test_output
             mkdir -p android_test_artifacts/screenshots
 
+            # Verify ADB and emulator paths
+            echo "ADB location: $(which adb)"
+            echo "Emulator location: $(which emulator)"
+            
+            # Clean up any stale emulator processes
+            pkill -9 emulator64-x86 || true
+            pkill -9 qemu-system-x86_64 || true
+            
+            echo "::group::ADB Connection Verification"
+            echo "Verifying ADB connection..."
+            # Ensure ADB server is in a clean state
+            adb kill-server || true
+            sleep 2
+            adb start-server
+            adb devices  # Initial check
+            sleep 5
+
+            # Force-stop and restart ADB server if no devices are found
+            if ! adb devices | grep -q "emulator"; then
+                echo "No emulator found, restarting ADB server..."
+                adb kill-server
+                sleep 2
+                adb start-server
+                sleep 5
+            fi
+
+            echo "Initial ADB devices:"
+            adb devices
+            echo "Waiting for device to be fully connected..."
+            adb wait-for-device
+            # More robust boot completion check
+            timeout 300 bash -c 'until adb shell getprop sys.boot_completed 2>&1 | grep -m 1 "1"; do sleep 2; done'
+            echo "Device boot completed"
+            adb devices -l
+            echo "Device properties:"
+            adb shell getprop ro.serialno
+            adb shell getprop ro.product.model
+            echo "::endgroup::"
+            
             echo "::group::Emulator Boot Process"
             # Wait for emulator to fully boot with progressive feedback
             echo "Waiting for emulator to start..."
             adb wait-for-device
             echo "Device connected, waiting for boot completion..."
+            # Verify device is visible after wait-for-device
+            echo "Current connected devices:"
+            adb devices
             
             # Get initial device diagnostics
             adb devices -l > android_test_artifacts/logs/device/devices_initial.log
@@ -159,8 +208,8 @@ jobs:
             set +e
             flutter --verbose test \
               --timeout=5m \
-              --no-retry \
-              --reporter expanded \
+              --machine \
+              --dart-define=CI=true \
               integration_test/app_test.dart \
               2>&1 | tee android_test_artifacts/logs/test_output/flutter_test_output.log
             TEST_EXIT_CODE=$?
