@@ -61,37 +61,24 @@ jobs:
       - name: Run Android integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
-          target: default
-          arch: x86_64
-          emulator-options: -no-window
+          api-level: 29
+          target: google_apis
+          arch: x86
+          profile: Nexus 6
           script: |
-            # Wait for emulator to be ready
-            adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 3; done'
+            # Simple boot check
+            adb wait-for-device
+            sleep 20
             
-            # Create screenshots directory
-            mkdir -p screenshots
-            
-            # Run the integration test with error handling
-            set +e
-            flutter test integration_test/app_test.dart
-            test_exit_code=$?
-            
-            # Capture screenshot if test fails
-            if [ $test_exit_code -ne 0 ]; then
-              echo "Test failed, capturing screenshot..."
-              adb shell screencap -p /sdcard/failure_screen.png
-              adb pull /sdcard/failure_screen.png screenshots/android_failure.png
-            fi
-            
-            exit $test_exit_code
-            
+            # Run the test with explicit device ID
+            flutter test integration_test/app_test.dart -d emulator-5554
+      
       - name: Upload Android test artifacts
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: android-test-results
-          path: screenshots/
+          path: build/reports/
 
   ios_test:
     name: iOS Integration Tests
